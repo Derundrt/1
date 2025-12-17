@@ -6,7 +6,7 @@
     <title>LogCoop - Платформа логистической кооперации</title>
     <style>
         :root {
-            --color-primary: #2180 8d;
+            --color-primary: #208c8d;
             --color-primary-hover: #1d7473;
             --color-primary-active: #1a6873;
             --color-background: #fcfcf9;
@@ -388,7 +388,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
                     <label style="font-size: 14px; font-weight: 500;">Пароль (минимум 6 символов)</label>
-                    <input type="password" id="registerPassword" placeholder="••••••••" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <input type="password" id="registerPassword" placeholder="••••••••" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                 </div>
                 
                 <button type="button" onclick="doRegister()" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Создать аккаунт</button>
@@ -481,6 +481,8 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
+            console.log("Попытка входа:", email);
+            
             if (!email || !password) {
                 alert('Заполни все поля!');
                 return;
@@ -503,14 +505,21 @@
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             
-            if (!email || !password || password.length < 6) {
-                alert('Email и пароль минимум 6 символов!');
+            console.log("Попытка регистрации:", email, password);
+            
+            if (!email || !password) {
+                alert('Заполни Email и Пароль!');
+                return;
+            }
+            if (password.length < 6) {
+                alert('Пароль должен быть минимум 6 символов!');
                 return;
             }
             
             firebase.auth().createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
                     const user = userCredential.user;
+                    console.log("✅ Аккаунт создан!");
                     
                     // Создаем профиль в базе
                     db.collection("users").doc(user.uid).set({
@@ -521,7 +530,6 @@
                         createdAt: new Date()
                     });
                     
-                    console.log("✅ Аккаунт создан!");
                     closeLoginModal();
                     alert("✅ Аккаунт создан!");
                 })
