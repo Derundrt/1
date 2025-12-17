@@ -6,7 +6,7 @@
     <title>LogCoop - Платформа логистической кооперации</title>
     <style>
         :root {
-            --color-primary: #218080d;
+            --color-primary: #2180 8d;
             --color-primary-hover: #1d7473;
             --color-primary-active: #1a6873;
             --color-background: #fcfcf9;
@@ -68,6 +68,7 @@
             text-decoration: none;
             font-size: 14px;
             transition: color 0.2s;
+            cursor: pointer;
         }
 
         nav a:hover {
@@ -220,6 +221,32 @@
             max-width: 500px;
             margin: 0 auto;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -231,7 +258,7 @@
                 <a class="nav-item active" onclick="showSection('home')">Главная</a>
                 <a class="nav-item" onclick="showSection('profile')">Профиль</a>
                 <a class="nav-item" onclick="showSection('order')">Заказ</a>
-                <button class="btn btn-primary" onclick="showLoginForm()">Вход</button>
+                <button class="btn btn-primary" id="loginBtn" onclick="openLoginModal()">Вход</button>
             </nav>
         </div>
     </header>
@@ -243,7 +270,7 @@
                 <h1>Добро пожаловать на LogCoop</h1>
                 <p>Платформа логистической кооперации для вашего бизнеса</p>
                 <div class="hero-buttons">
-                    <button class="btn btn-primary" onclick="showLoginForm()">Начать</button>
+                    <button class="btn btn-primary" onclick="openLoginModal()">Начать</button>
                 </div>
             </div>
         </section>
@@ -334,19 +361,79 @@
         <p>&copy; 2025 LogCoop. Платформа логистической кооперации</p>
     </footer>
 
-    <!-- Firebase SDKs (из CDN) -->
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; text-align: center;" id="modalTitle">Вход в кабинет</h2>
+            
+            <div id="loginForm">
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <label style="font-size: 14px; font-weight: 500;">Email</label>
+                    <input type="email" id="loginEmail" placeholder="вам@email.com" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                    <label style="font-size: 14px; font-weight: 500;">Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                
+                <button type="button" onclick="doLogin()" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Вход</button>
+                <button type="button" onclick="switchToRegister()" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Нет аккаунта? Регистрация</button>
+                <button type="button" onclick="closeLoginModal()" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background-color: #ddd; color: #134252; width: 100%;">Закрыть</button>
+            </div>
+            
+            <div id="registerForm" style="display: none;">
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <label style="font-size: 14px; font-weight: 500;">Email</label>
+                    <input type="email" id="registerEmail" placeholder="вам@email.com" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                    <label style="font-size: 14px; font-weight: 500;">Пароль (минимум 6 символов)</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                
+                <button type="button" onclick="doRegister()" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Создать аккаунт</button>
+                <button type="button" onclick="switchToLogin()" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Уже есть аккаунт? Вход</button>
+                <button type="button" onclick="closeLoginModal()" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background-color: #ddd; color: #134252; width: 100%;">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
 
-    <!-- Твой конфиг Firebase -->
-    <script src="firebase-config.js"></script>
-
-    <!-- Логика входа/регистрации -->
-    <script src="auth.js"></script>
-
     <script>
-        // Навигация между страницами
+        // ⚠️ ВСТАВЬ СЮДА СВОЙ КОНФИГ FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDemoKeyReplace123456789",
+            authDomain: "logcoop-demo.firebaseapp.com",
+            projectId: "logcoop-demo",
+            storageBucket: "logcoop-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Инициализируем Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        console.log("✅ Firebase подключён!");
+
+        // Проверяем авторизацию при загрузке
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                console.log("✅ Пользователь вошел:", user.email);
+                loadUserProfile(user.uid);
+                updateLoginButton(user.email);
+            } else {
+                console.log("❌ Пользователь не авторизован");
+                updateLoginButton(null);
+            }
+        });
+
+        // 🔐 ФУНКЦИИ НАВИГАЦИИ
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => section.classList.remove('active'));
@@ -365,7 +452,143 @@
             }
         }
 
-        // Редактирование профиля
+        // 🔐 МОДАЛЬНОЕ ОКНО
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+
+        function switchToRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('modalTitle').textContent = 'Создать аккаунт';
+        }
+
+        function switchToLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('modalTitle').textContent = 'Вход в кабинет';
+        }
+
+        // 🔐 ВХОД
+        function doLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Заполни все поля!');
+                return;
+            }
+            
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    console.log("✅ Вход успешен!");
+                    closeLoginModal();
+                    alert("✅ Вы вошли в систему!");
+                })
+                .catch(error => {
+                    console.error("❌ Ошибка входа:", error.message);
+                    alert("Ошибка: " + error.message);
+                });
+        }
+
+        // 🔐 РЕГИСТРАЦИЯ
+        function doRegister() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            if (!email || !password || password.length < 6) {
+                alert('Email и пароль минимум 6 символов!');
+                return;
+            }
+            
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    
+                    // Создаем профиль в базе
+                    db.collection("users").doc(user.uid).set({
+                        email: email,
+                        companyName: "",
+                        contactName: "",
+                        phone: "",
+                        createdAt: new Date()
+                    });
+                    
+                    console.log("✅ Аккаунт создан!");
+                    closeLoginModal();
+                    alert("✅ Аккаунт создан!");
+                })
+                .catch(error => {
+                    console.error("❌ Ошибка регистрации:", error.message);
+                    alert("Ошибка: " + error.message);
+                });
+        }
+
+        // 🚪 ВЫХОД
+        function doLogout() {
+            firebase.auth().signOut()
+                .then(() => {
+                    console.log("✅ Выход выполнен");
+                    alert("Вы вышли из системы");
+                })
+                .catch(error => console.error("❌ Ошибка выхода:", error));
+        }
+
+        // 💾 ЗАГРУЖАЕМ ПРОФИЛЬ
+        function loadUserProfile(userId) {
+            db.collection("users").doc(userId).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        console.log("✅ Профиль загружен:", userData);
+                        document.getElementById('displayCompanyName').textContent = userData.companyName || "—";
+                        document.getElementById('displayContactName').textContent = userData.contactName || "—";
+                        document.getElementById('displayEmail').textContent = userData.email;
+                        document.getElementById('displayPhone').textContent = userData.phone || "—";
+                    }
+                })
+                .catch(error => console.error("❌ Ошибка загрузки профиля:", error));
+        }
+
+        // 💾 СОХРАНЯЕМ ПРОФИЛЬ
+        function saveProfileToFirebase(event) {
+            event.preventDefault();
+            
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                alert("Вы не авторизованы!");
+                return;
+            }
+            
+            const companyName = document.getElementById('editCompanyName').value;
+            const contactName = document.getElementById('editContactName').value;
+            const phone = document.getElementById('editPhone').value;
+            
+            db.collection("users").doc(user.uid).update({
+                companyName: companyName,
+                contactName: contactName,
+                phone: phone,
+                updatedAt: new Date()
+            })
+            .then(() => {
+                console.log("✅ Профиль сохранен!");
+                alert("✓ Профиль успешно сохранён!");
+                loadUserProfile(user.uid);
+                toggleEditMode();
+            })
+            .catch(error => {
+                console.error("❌ Ошибка сохранения:", error);
+                alert("Ошибка: " + error.message);
+            });
+        }
+
+        // 🎨 РЕДАКТИРОВАНИЕ ПРОФИЛЯ
         function toggleEditMode() {
             const profileDisplay = document.getElementById('profileDisplay');
             const profileEdit = document.getElementById('profileEdit');
@@ -377,12 +600,30 @@
                 profileDisplay.style.display = 'none';
                 profileEdit.style.display = 'block';
                 
-                // Заполняем поля для редактирования
                 document.getElementById('editCompanyName').value = document.getElementById('displayCompanyName').textContent || '';
                 document.getElementById('editContactName').value = document.getElementById('displayContactName').textContent || '';
                 document.getElementById('editPhone').value = document.getElementById('displayPhone').textContent || '';
             }
         }
+
+        // 🎨 ОБНОВЛЯЕМ КНОПКУ ВХОДА
+        function updateLoginButton(user) {
+            const btn = document.getElementById('loginBtn');
+            if (user) {
+                btn.textContent = "Выход";
+                btn.onclick = doLogout;
+            } else {
+                btn.textContent = "Вход";
+                btn.onclick = openLoginModal;
+            }
+        }
+
+        // Закрытие модала при клике на фон
+        document.getElementById('loginModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('loginModal')) {
+                closeLoginModal();
+            }
+        });
     </script>
 </body>
 </html>
